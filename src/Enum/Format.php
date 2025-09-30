@@ -19,5 +19,10 @@ final class Format
     /**
      * @var string
      */
+    public const XML = 'xml';
+
+    /**
+     * @var string
+     */
     public const PHP = 'php';
 }

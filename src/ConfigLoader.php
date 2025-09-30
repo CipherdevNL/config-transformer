@@ -17,6 +17,7 @@ use Symfony\Component\DependencyInjection\Loader\GlobFileLoader;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\Finder\SplFileInfo;
 use Symplify\ConfigTransformer\DependencyInjection\ExtensionFaker;
+use Symplify\ConfigTransformer\DependencyInjection\Loader\MissingAutodiscoveryDirectoryTolerantXmlFileLoader;
 use Symplify\ConfigTransformer\DependencyInjection\Loader\MissingAutodiscoveryDirectoryTolerantYamlFileLoader;
 use Symplify\ConfigTransformer\DependencyInjection\Loader\SkippingPhpFileLoader;
 use Symplify\ConfigTransformer\Enum\Format;
@@ -90,19 +91,18 @@ final class ConfigLoader
     private function createLoaderBySuffix(ContainerBuilder $containerBuilder, string $suffix): DelegatingLoader
     {
         if (in_array($suffix, [Format::YML, Format::YAML], true)) {
-            $missingAutodiscoveryDirectoryTolerantYamlFileLoader = new MissingAutodiscoveryDirectoryTolerantYamlFileLoader(
-                $containerBuilder,
-                new FileLocator()
-            );
-            return $this->wrapToDelegatingLoader(
-                $missingAutodiscoveryDirectoryTolerantYamlFileLoader,
-                $containerBuilder
-            );
+            $fileLoader = new MissingAutodiscoveryDirectoryTolerantYamlFileLoader($containerBuilder, new FileLocator());
+            return $this->wrapToDelegatingLoader($fileLoader, $containerBuilder);
+        }
+
+        if (in_array($suffix, [Format::XML], true)) {
+            $fileLoader = new MissingAutodiscoveryDirectoryTolerantXmlFileLoader($containerBuilder, new FileLocator());
+            return $this->wrapToDelegatingLoader($fileLoader, $containerBuilder);
         }
 
         if ($suffix === Format::PHP) {
-            $phpFileLoader = new PhpFileLoader($containerBuilder, new FileLocator());
-            return $this->wrapToDelegatingLoader($phpFileLoader, $containerBuilder);
+            $fileLoader = new PhpFileLoader($containerBuilder, new FileLocator());
+            return $this->wrapToDelegatingLoader($fileLoader, $containerBuilder);
         }
 
         throw new NotImplementedYetException($suffix);

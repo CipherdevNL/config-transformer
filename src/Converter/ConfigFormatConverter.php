@@ -15,6 +15,7 @@ final class ConfigFormatConverter
     public function __construct(
         private readonly ConfigLoader $configLoader,
         private readonly YamlToPhpConverter $yamlToPhpConverter,
+        private readonly XmlToPhpConverter $xmlToPhpConverter,
         private readonly CurrentFilePathProvider $currentFilePathProvider,
     ) {
     }
@@ -29,6 +30,10 @@ final class ConfigFormatConverter
 
         if (in_array($fileInfo->getExtension(), [Format::YAML, Format::YML], true)) {
             return $this->yamlToPhpConverter->convert($dumpedContainerContent, $fileInfo->getRealPath());
+        }
+
+        if (in_array($fileInfo->getExtension(), [Format::XML], true)) {
+            return $this->xmlToPhpConverter->convert($dumpedContainerContent, $fileInfo->getRealPath());
         }
 
         $message = sprintf('Suffix "%s" is not supported', $fileInfo->getExtension());
